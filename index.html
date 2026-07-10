@@ -414,7 +414,7 @@
 <div id="board" class="board"></div>
 
 <div class="reset-row">
-  <button id="resetBtn">Azzera punteggi AURA</button>
+  <button id="resetBtn">Azzera punteggi</button>
 </div>
 
 <div class="overlay" id="overlay">
@@ -445,13 +445,13 @@ const DEFAULT_BONUS = [
   {id:'b10', label:'Pino ti chiama per nome', points:10},
   {id:'b11', label:'Varisco fa il pane giusto', points:30},
   {id:'b12', label:"Lavi l'affettatrice e non la riutilizzi", points:50},
-  {id:'b13', label:"Lavi l'affettatrice e vai via: chi resta deve lavarla", points:60},
+  {id:'b13', label:"Lavi l'affettatrice, vai via: chi resta deve lavarla", points:60},
 ];
 const DEFAULT_MALUS = [
   {id:'m1', label:'Alice va a prendere la carne e viene chiamata Martina', points:50},
   {id:'m2', label:'Raffata', points:30},
   {id:'m3', label:'Piadina di Sara in chiusura', points:10},
-  {id:'m4', label:'La Fede sale... "ragazzeeeee"', points:20},
+  {id:'m4', label:'La fede sale... "ragazzeeeee"', points:20},
   {id:'m5', label:'Devi tagliare il panino in 2', points:30},
   {id:'m6', label:'Verdure grigliate di contorno', points:30},
   {id:'m7', label:'Arriva la verdura/DAC nel momento sbagliato', points:20},
@@ -460,8 +460,8 @@ const DEFAULT_MALUS = [
   {id:'m10', label:'Doppio cheeseburger nei 15 min prima della chiusura', points:20},
 ];
 const DEFAULT_PLAYERS = {
-  p1:{name:'Marti', score:0},
-  p2:{name:'Alice', score:0}
+  p1:{name:'Thina', score:0},
+  p2:{name:'Collega', score:0}
 };
 
 let state = {
@@ -582,7 +582,7 @@ function openModal(pid, type){
   const sub = document.getElementById('sheetSub');
   title.textContent = type === 'bonus' ? '🍻 Bonus' : '💧 Malus';
   title.className = type === 'bonus' ? 'bonus-title' : 'malus-title';
-  sub.textContent = type === 'bonus' ? '' : '';
+  sub.textContent = type === 'bonus' ? 'Dal più frequente al più raro' : 'Dal più frequente al più grave';
   renderEventList();
   const addForm = document.getElementById('addForm');
   addForm.querySelector('button').className = type;
@@ -672,13 +672,13 @@ resetBtn.addEventListener('click', ()=>{
     clearTimeout(resetTimer);
     resetTimer = setTimeout(()=>{
       resetArmed = false;
-      resetBtn.textContent = 'Azzera punteggi AURA';
+      resetBtn.textContent = 'Azzera punteggi';
     }, 3000);
     return;
   }
   clearTimeout(resetTimer);
   resetArmed = false;
-  resetBtn.textContent = 'Azzera punteggi AURA';
+  resetBtn.textContent = 'Azzera punteggi';
   Object.keys(state.players).forEach(pid=> state.players[pid].score = 0);
   render();
   saveState();
