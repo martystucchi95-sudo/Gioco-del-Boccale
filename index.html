@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#4a3221">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Boccale">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Boccale Game — HIBU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood-dark:#4a3221;
+    --wood-mid:#6b4a30;
+    --wood-light:#8a6440;
+    --cork:#c99a63;
+    --card:#fbf1de;
+    --card-edge:#e8d3ab;
+    --ink:#3b2718;
+    --ink-soft:#6b5540;
+    --beer-top:#f7b731;
+    --beer-bot:#e08b0c;
+    --foam:#fffaf0;
+    --bonus:#5c8f4f;
+    --bonus-light:#e7f3e1;
+    --malus:#c1443c;
+    --malus-light:#fbe6e4;
+    --gold-line:#d9a441;
+    --ice-top:#eaf7fb;
+    --ice-bot:#a9def0;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Quicksand',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.06), transparent 40%),
+      repeating-linear-gradient(90deg, var(--wood-mid) 0px, var(--wood-mid) 38px, var(--wood-dark) 40px),
+      var(--wood-dark);
+    padding:20px 14px 60px;
+  }
+  .top{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  .top h1{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:2.6rem;
+    color:var(--foam);
+    margin:0;
+    text-shadow:0 2px 0 rgba(0,0,0,0.35);
+    letter-spacing:0.5px;
+  }
+  .top p{
+    color:#e5cda6;
+    font-size:0.85rem;
+    margin:2px 0 0;
+    font-weight:600;
+    letter-spacing:0.3px;
+  }
+  .max-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-top:8px;
+    font-size:0.8rem;
+    color:#e5cda6;
+    font-weight:600;
+  }
+  .max-row input{
+    width:56px;
+    text-align:center;
+    border-radius:8px;
+    border:1.5px solid var(--card-edge);
+    padding:3px 4px;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    background:var(--card);
+    color:var(--ink);
+  }
+  .board{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    justify-content:center;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .player{
+    background:var(--card);
+    border:2px solid var(--card-edge);
+    border-radius:22px;
+    padding:16px 14px 18px;
+    width:100%;
+    max-width:290px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.4);
+    position:relative;
+    overflow:hidden;
+  }
+  .player::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    background:repeating-linear-gradient(90deg, var(--gold-line) 0 10px, transparent 10px 20px);
+    opacity:0.5;
+  }
+  .name-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:6px;
+  }
+  .name-input{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:1.7rem;
+    text-align:center;
+    background:transparent;
+    border:none;
+    border-bottom:2px dashed transparent;
+    color:var(--ink);
+    max-width:180px;
+    padding:0 4px;
+  }
+  .name-input:focus{outline:none;border-bottom:2px dashed var(--gold-line);}
+  .score{
+    text-align:center;
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:2.1rem;
+    color:var(--ink);
+    margin-bottom:6px;
+    min-height:34px;
+    transition:transform 0.25s;
+  }
+  .score.bump{transform:scale(1.25);}
+  .score.positive{color:var(--bonus);}
+  .score.negative{color:var(--malus);}
+
+  .mug-wrap{
+    display:flex;
+    justify-content:center;
+    margin:6px 0 14px;
+  }
+  .mug{
+    position:relative;
+    width:130px;
+    height:170px;
+  }
+  .glass{
+    position:absolute;
+    inset:0;
+    border-radius:14px 14px 20px 20px;
+    background:linear-gradient(180deg, rgba(200,220,230,0.28), rgba(200,220,230,0.12));
+    border:4px solid rgba(120,140,150,0.55);
+    box-shadow:
+      inset 0 0 14px rgba(255,255,255,0.6),
+      inset 0 2px 4px rgba(255,255,255,0.8),
+      0 6px 14px rgba(0,0,0,0.25);
+    overflow:hidden;
+  }
+  .handle{
+    position:absolute;
+    right:-26px;
+    top:38px;
+    width:34px;
+    height:78px;
+    border:9px solid rgba(120,140,150,0.6);
+    border-left:none;
+    border-radius:0 40px 40px 0;
+    box-shadow:0 4px 8px rgba(0,0,0,0.2);
+  }
+  .liquid{
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:50%;
+    background:linear-gradient(180deg, var(--beer-top), var(--beer-bot));
+    transition:height 0.6s cubic-bezier(.34,1.56,.64,1);
+  }
+  .liquid.ice{
+    background:linear-gradient(180deg, var(--ice-top), var(--ice-bot));
+  }
+  .liquid.ice .foam{
+    background:#f7fdff;
+  }
+  .ice-cube{
+    position:absolute;
+    width:15px;
+    height:15px;
+    background:rgba(255,255,255,0.8);
+    border:1px solid rgba(255,255,255,0.95);
+    border-radius:3px;
+    box-shadow:inset 0 0 5px rgba(150,215,235,0.7);
+    animation:bob 3.4s ease-in-out infinite;
+  }
+  @keyframes bob{
+    0%,100%{ transform:translateY(0) rotate(-4deg); }
+    50%{ transform:translateY(-7px) rotate(6deg); }
+  }
+  .bubble{
+    position:absolute;
+    bottom:0;
+    width:5px;height:5px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.55);
+    animation:rise 3.2s linear infinite;
+  }
+  @keyframes rise{
+    0%{transform:translateY(0);opacity:0;}
+    10%{opacity:1;}
+    100%{transform:translateY(-140px);opacity:0;}
+  }
+  .foam{
+    position:absolute;
+    left:-3px;right:-3px;
+    top:-11px;
+    height:26px;
+    background:var(--foam);
+    border-radius:50% 50% 40% 40% / 60% 60% 40% 40%;
+    box-shadow:0 3px 4px rgba(0,0,0,0.08);
+  }
+  .foam::before,.foam::after{
+    content:"";
+    position:absolute;
+    background:var(--foam);
+    border-radius:50%;
+  }
+  .foam::before{width:20px;height:20px;top:-8px;left:14px;}
+  .foam::after{width:16px;height:16px;top:-6px;right:20px;}
+
+  .btn-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+  }
+  .pt-btn{
+    flex:1;
+    max-width:110px;
+    border:none;
+    border-radius:16px;
+    padding:12px 0;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:1.5rem;
+    cursor:pointer;
+    color:#fff;
+    box-shadow:0 4px 0 rgba(0,0,0,0.18);
+    transition:transform 0.08s;
+  }
+  .pt-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.18);}
+  .pt-btn.bonus{background:var(--bonus);}
+  .pt-btn.malus{background:var(--malus);}
+
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(30,18,10,0.55);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  .overlay.show{display:flex;}
+  .sheet{
+    background:var(--card);
+    width:100%;
+    max-width:420px;
+    border-radius:24px 24px 0 0;
+    padding:18px 18px 22px;
+    max-height:78vh;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 -8px 24px rgba(0,0,0,0.3);
+  }
+  .sheet h2{
+    font-family:'Caveat',cursive;
+    font-size:1.8rem;
+    margin:0 0 2px;
+    text-align:center;
+  }
+  .sheet h2.bonus-title{color:var(--bonus);}
+  .sheet h2.malus-title{color:var(--malus);}
+  .sheet .sub{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-bottom:12px;
+    font-weight:600;
+  }
+  .event-list{
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .event-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 12px;
+    border-radius:14px;
+    font-weight:600;
+    font-size:0.95rem;
+    cursor:pointer;
+    border:1.5px solid transparent;
+  }
+  .event-item.bonus{background:var(--bonus-light);color:#3d5c34;}
+  .event-item.malus{background:var(--malus-light);color:#7d2b26;}
+  .event-item .pts{
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    white-space:nowrap;
+    margin-left:10px;
+  }
+  .event-item .del{
+    background:none;border:none;
+    color:inherit;opacity:0.5;
+    font-size:1.1rem;
+    padding:0 4px;
+    cursor:pointer;
+  }
+  .add-form{
+    display:flex;
+    gap:6px;
+    border-top:1.5px dashed var(--card-edge);
+    padding-top:12px;
+  }
+  .add-form input{
+    font-family:'Quicksand',sans-serif;
+    border:1.5px solid var(--card-edge);
+    border-radius:10px;
+    padding:8px 10px;
+    font-size:0.85rem;
+    background:#fff;
+  }
+  .add-form input.label{flex:1;min-width:0;}
+  .add-form input.pts{width:56px;text-align:center;}
+  .add-form button{
+    border:none;
+    border-radius:10px;
+    padding:0 14px;
+    font-weight:700;
+    color:#fff;
+    cursor:pointer;
+    font-size:0.85rem;
+  }
+  .add-form button.bonus{background:var(--bonus);}
+  .add-form button.malus{background:var(--malus);}
+  .close-btn{
+    margin-top:12px;
+    align-self:center;
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-weight:700;
+    font-size:0.85rem;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  .empty-hint{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    padding:10px 0;
+  }
+  .loading{
+    text-align:center;
+    color:#e5cda6;
+    font-size:0.9rem;
+    margin-top:40px;
+  }
+  .reset-row{
+    text-align:center;
+    margin-top:22px;
+  }
+  .reset-row button{
+    background:none;
+    border:1.5px solid #e5cda6;
+    color:#e5cda6;
+    padding:7px 16px;
+    border-radius:20px;
+    font-family:'Quicksand',sans-serif;
+    font-weight:600;
+    font-size:0.8rem;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>🍺 Gioco del Boccale</h1>
+  <p>Bonus &amp; malus di servizio — HIBU</p>
+  <div class="max-row">
+    <label for="maxScoreInput">Boccale pieno a</label>
+    <input type="number" id="maxScoreInput" min="1" step="1">
+    <span>punti</span>
+  </div>
+</div>
+
+<div id="board" class="board"></div>
+
+<div class="reset-row">
+  <button id="resetBtn">Azzera punteggi</button>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <h2 id="sheetTitle"></h2>
+    <p class="sub" id="sheetSub"></p>
+    <div class="event-list" id="eventList"></div>
+    <div class="add-form" id="addForm">
+      <input class="label" id="newLabel" type="text" placeholder="Nuovo evento...">
+      <input class="pts" id="newPts" type="number" min="1" placeholder="pt">
+      <button id="addBtn">+</button>
+    </div>
+    <button class="close-btn" id="closeBtn">chiudi</button>
+  </div>
+</div>
+
+<script>
+const DEFAULT_BONUS = [
+  {id:'b1', label:'Il BIOOONDOO', points:150},
+  {id:'b2', label:'Il capo fa il brisket', points:150},
+  {id:'b3', label:'Nessun brisket', points:60},
+  {id:'b4', label:'Alice va a prendere la carne ed è chiamata da Pino', points:50},
+  {id:'b5', label:'Raffa azzecca il nome', points:30},
+  {id:'b6', label:'Pulisci piastra prima della chiusura', points:100},
+  {id:'b7', label:'Spegni lavastoviglie prima della chiusura', points:20},
+  {id:'b8', label:'Chiudi prima', points:100},
+  {id:'b9', label:'Hamburger al forno', points:10},
+  {id:'b10', label:'Pino ti chiama per nome', points:10},
+  {id:'b11', label:'Varisco fa il pane giusto', points:30},
+  {id:'b12', label:"Lavi l'affettatrice e non la riutilizzi", points:50},
+  {id:'b13', label:"Lavi l'affettatrice, vai via: chi resta deve lavarla", points:60},
+];
+const DEFAULT_MALUS = [
+  {id:'m1', label:'Alice va a prendere la carne e viene chiamata Martina', points:50},
+  {id:'m2', label:'Raffata', points:30},
+  {id:'m3', label:'Piadina di Sara in chiusura', points:10},
+  {id:'m4', label:'La fede sale... "ragazzeeeee"', points:20},
+  {id:'m5', label:'Devi tagliare il panino in 2', points:30},
+  {id:'m6', label:'Verdure grigliate di contorno', points:30},
+  {id:'m7', label:'Arriva la verdura/DAC nel momento sbagliato', points:20},
+  {id:'m8', label:"Riusi l'affettatrice e devi rilavarla", points:60},
+  {id:'m9', label:"Chi rimane deve lavare l'affettatrice lasciata da altri", points:60},
+  {id:'m10', label:'Doppio cheeseburger nei 15 min prima della chiusura', points:20},
+];
+const DEFAULT_PLAYERS = {
+  p1:{name:'Thina', score:0},
+  p2:{name:'Collega', score:0}
+};
+
+let state = {
+  players: JSON.parse(JSON.stringify(DEFAULT_PLAYERS)),
+  bonus: JSON.parse(JSON.stringify(DEFAULT_BONUS)),
+  malus: JSON.parse(JSON.stringify(DEFAULT_MALUS)),
+  maxScore: 150,
+};
+
+let activeModal = null; // {playerId, type}
+const STORAGE_KEY = 'boccale-state-hibu';
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(state, parsed);
+    }
+  }catch(e){ /* niente salvato ancora, uso i default */ }
+  render();
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ console.error('Storage error', e); }
+}
+
+function clampFill(score){
+  // 0 punti = boccale vuoto, cresce fino a maxScore = boccale pieno
+  const max = state.maxScore || 150;
+  let pct = (score / max) * 100;
+  return Math.max(0, Math.min(100, pct));
+}
+
+function render(){
+  const maxInput = document.getElementById('maxScoreInput');
+  if(document.activeElement !== maxInput){
+    maxInput.value = state.maxScore;
+  }
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  Object.keys(state.players).forEach(pid=>{
+    const p = state.players[pid];
+    const isNegative = p.score < 0;
+    const fill = clampFill(Math.abs(p.score));
+    const scoreClass = p.score > 0 ? 'positive' : (p.score < 0 ? 'negative' : '');
+    const el = document.createElement('div');
+    el.className = 'player';
+    const iceCubes = [
+      {left:18, bottom:12, delay:0},
+      {left:52, bottom:45, delay:0.6},
+      {left:32, bottom:75, delay:1.2},
+      {left:68, bottom:20, delay:1.8},
+    ];
+    el.innerHTML = `
+      <div class="name-row">
+        <input class="name-input" data-pid="${pid}" value="${p.name}" maxlength="14">
+      </div>
+      <div class="score ${scoreClass}" id="score-${pid}">${p.score > 0 ? '+' : ''}${p.score}</div>
+      <div class="mug-wrap">
+        <div class="mug">
+          <div class="glass">
+            <div class="liquid ${isNegative ? 'ice' : ''}" id="liquid-${pid}" style="height:${fill}%;">
+              ${fill > 2 ? (isNegative
+                ? `<div class="foam"></div>${iceCubes.map(c=>`<div class="ice-cube" style="left:${c.left}%; bottom:${c.bottom}%; animation-delay:${c.delay}s;"></div>`).join('')}`
+                : `<div class="foam"></div>${[...Array(4)].map((_,i)=>`<div class="bubble" style="left:${15+i*22}%; animation-delay:${i*0.7}s;"></div>`).join('')}`
+              ) : ''}
+            </div>
+          </div>
+          <div class="handle"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="pt-btn bonus" data-pid="${pid}" data-type="bonus">+</button>
+        <button class="pt-btn malus" data-pid="${pid}" data-type="malus">−</button>
+      </div>
+    `;
+    board.appendChild(el);
+  });
+
+  document.querySelectorAll('.name-input').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const pid = e.target.dataset.pid;
+      state.players[pid].name = e.target.value.trim() || 'Giocatore';
+      saveState();
+    });
+  });
+  document.querySelectorAll('.pt-btn').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const pid = e.target.dataset.pid;
+      const type = e.target.dataset.type;
+      openModal(pid, type);
+    });
+  });
+}
+
+function bumpScore(pid){
+  const el = document.getElementById('score-'+pid);
+  if(!el) return;
+  el.classList.add('bump');
+  setTimeout(()=>el.classList.remove('bump'), 250);
+}
+
+function applyPoints(pid, type, points){
+  const delta = type === 'bonus' ? points : -points;
+  state.players[pid].score += delta;
+  render();
+  bumpScore(pid);
+  saveState();
+}
+
+function openModal(pid, type){
+  activeModal = {pid, type};
+  const overlay = document.getElementById('overlay');
+  const title = document.getElementById('sheetTitle');
+  const sub = document.getElementById('sheetSub');
+  title.textContent = type === 'bonus' ? '🍻 Bonus' : '💧 Malus';
+  title.className = type === 'bonus' ? 'bonus-title' : 'malus-title';
+  sub.textContent = type === 'bonus' ? 'Dal più frequente al più raro' : 'Dal più frequente al più grave';
+  renderEventList();
+  const addForm = document.getElementById('addForm');
+  addForm.querySelector('button').className = type;
+  addForm.querySelector('button').textContent = 'aggiungi';
+  overlay.classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+  activeModal = null;
+}
+
+function renderEventList(){
+  if(!activeModal) return;
+  const list = state[activeModal.type];
+  const sorted = [...list].sort((a,b)=>a.points-b.points);
+  const container = document.getElementById('eventList');
+  if(sorted.length === 0){
+    container.innerHTML = '<div class="empty-hint">Nessun evento ancora. Aggiungine uno qui sotto!</div>';
+    return;
+  }
+  container.innerHTML = sorted.map(ev=>`
+    <div class="event-item ${activeModal.type}" data-id="${ev.id}">
+      <span class="lbl">${ev.label}</span>
+      <span class="pts">${activeModal.type==='bonus'?'+':'−'}${ev.points}</span>
+      <button class="del" data-id="${ev.id}" title="rimuovi">✕</button>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.event-item').forEach(item=>{
+    item.addEventListener('click', e=>{
+      if(e.target.classList.contains('del')) return;
+      const id = item.dataset.id;
+      const ev = list.find(x=>x.id===id);
+      if(ev){
+        applyPoints(activeModal.pid, activeModal.type, ev.points);
+        closeModal();
+      }
+    });
+  });
+  container.querySelectorAll('.del').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      state[activeModal.type] = list.filter(x=>x.id!==id);
+      saveState();
+      renderEventList();
+    });
+  });
+}
+
+document.getElementById('addBtn').addEventListener('click', ()=>{
+  if(!activeModal) return;
+  const labelInput = document.getElementById('newLabel');
+  const ptsInput = document.getElementById('newPts');
+  const label = labelInput.value.trim();
+  const pts = parseInt(ptsInput.value, 10);
+  if(!label || !pts || pts < 1) return;
+  const id = activeModal.type[0] + Date.now();
+  state[activeModal.type].push({id, label, points: pts});
+  labelInput.value = '';
+  ptsInput.value = '';
+  saveState();
+  renderEventList();
+});
+
+document.getElementById('maxScoreInput').addEventListener('change', e=>{
+  const val = parseInt(e.target.value, 10);
+  if(val && val > 0){
+    state.maxScore = val;
+    render();
+    saveState();
+  }
+});
+
+document.getElementById('closeBtn').addEventListener('click', closeModal);
+document.getElementById('overlay').addEventListener('click', e=>{
+  if(e.target.id === 'overlay') closeModal();
+});
+let resetArmed = false;
+let resetTimer = null;
+const resetBtn = document.getElementById('resetBtn');
+resetBtn.addEventListener('click', ()=>{
+  if(!resetArmed){
+    resetArmed = true;
+    resetBtn.textContent = 'Sicura? Tocca di nuovo';
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(()=>{
+      resetArmed = false;
+      resetBtn.textContent = 'Azzera punteggi';
+    }, 3000);
+    return;
+  }
+  clearTimeout(resetTimer);
+  resetArmed = false;
+  resetBtn.textContent = 'Azzera punteggi';
+  Object.keys(state.players).forEach(pid=> state.players[pid].score = 0);
+  render();
+  saveState();
+});
+
+document.getElementById('board').innerHTML = '<div class="loading">Riempiendo i boccali...</div>';
+loadState();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

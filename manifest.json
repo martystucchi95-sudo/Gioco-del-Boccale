@@ -1,0 +1,25 @@
+{
+  "name": "Boccale Game — HIBU",
+  "short_name": "Boccale",
+  "description": "Bonus e malus di servizio con boccali che si riempiono",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#4a3221",
+  "theme_color": "#4a3221",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
