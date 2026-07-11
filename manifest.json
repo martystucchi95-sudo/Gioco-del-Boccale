@@ -1,6 +1,6 @@
 {
-  "name": "Boccale Game — HIBU",
-  "short_name": "Boccale",
+  "name": "Gioco del Boccale",
+  "short_name": "Hibu Game",
   "description": "Bonus e malus di servizio con boccali che si riempiono",
   "start_url": "./index.html",
   "scope": "./",
